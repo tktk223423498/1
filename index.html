@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>do it.</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="do it.">
+<meta name="theme-color" content="#2C2925">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F2EC;--surface:#FEFCF8;--surface2:#F2EFE9;
+  --border:#E2DDD6;--border-light:#EDE9E2;
+  --text1:#2C2925;--text2:#7A746E;--text3:#B0AAA3;
+  --safe:#5F8A5A;--safe-bg:#EEF3EC;
+  --warn:#B07A42;--warn-bg:#F8F0E6;
+  --urgent:#9E3E35;--urgent-bg:#F5EDEC;
+  --r:3px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text1);min-height:100vh;transition:background 3s ease;font-size:14px;line-height:1.6;}
+body.s-warning{background:#F2EBE0}
+body.s-urgent{background:#EFE5E4}
+body.s-critical{animation:bgP 5s ease-in-out infinite}
+@keyframes bgP{0%,100%{background:#EFE5E4}50%{background:#E8DCDB}}
+
+.wrap{max-width:660px;margin:0 auto;padding:48px 24px 100px}
+
+/* HEADER */
+header{margin-bottom:36px;padding-bottom:18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-end}
+.hdr-left h1{font-family:'Shippori Mincho',serif;font-weight:400;font-size:22px;letter-spacing:.12em}
+.hdr-left p{font-size:10px;color:var(--text3);letter-spacing:.16em;margin-top:2px}
+.hdr-nav{display:flex;gap:6px;flex-wrap:wrap}
+.nav-btn{background:none;border:1px solid var(--border);border-radius:var(--r);padding:6px 12px;font-family:'Noto Sans JP',sans-serif;font-size:11px;letter-spacing:.06em;color:var(--text2);cursor:pointer;transition:all .18s}
+.nav-btn:hover,.nav-btn.on{background:var(--text1);color:var(--surface);border-color:var(--text1)}
+
+/* TODAY BANNER */
+.today-banner{background:var(--warn-bg);border:1px solid #E8C898;border-radius:var(--r);padding:14px 18px;margin-bottom:22px;display:none}
+.today-banner.show{display:block}
+.today-title{font-size:10px;letter-spacing:.14em;color:var(--warn);margin-bottom:8px}
+.today-item{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid rgba(184,127,74,.15);font-size:13px}
+.today-item:last-child{border-bottom:none}
+.today-task{font-size:11px;color:var(--text3);margin-left:auto}
+.today-chk{width:13px;height:13px;border:1px solid var(--warn);border-radius:2px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.today-chk.on{background:var(--safe);border-color:var(--safe)}
+.today-chk.on::after{content:'✓';font-size:8px;color:#fff}
+.today-main-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(184,127,74,.15);font-size:13px;font-weight:500}
+.today-main-item:last-child{border-bottom:none}
+.today-main-badge{font-size:10px;color:var(--urgent);margin-left:auto;letter-spacing:.06em;white-space:nowrap}
+
+/* ADD FORM */
+.form-box{background:var(--surface);border:1px solid var(--border-light);border-radius:var(--r);padding:22px;margin-bottom:24px}
+.form-label{font-size:10px;letter-spacing:.14em;color:var(--text3);margin-bottom:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-grid.full{grid-template-columns:1fr}
+.fg label{font-size:11px;color:var(--text2);letter-spacing:.04em;display:block;margin-bottom:3px}
+.fg input{width:100%;border:1px solid var(--border);background:var(--bg);border-radius:var(--r);padding:8px 11px;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:var(--text1);outline:none;transition:border-color .18s}
+.fg input:focus{border-color:var(--text2)}
+.fg input::placeholder{color:var(--text3)}
+.btn-add{width:100%;padding:10px;background:var(--text1);color:var(--surface);border:none;border-radius:var(--r);font-family:'Noto Sans JP',sans-serif;font-size:13px;letter-spacing:.08em;cursor:pointer;transition:opacity .18s;margin-top:2px}
+.btn-add:hover{opacity:.78}
+
+/* FILTER BAR */
+.filter-bar{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.filter-lbl{font-size:10px;letter-spacing:.1em;color:var(--text3);margin-right:2px}
+.btn-filter{background:none;border:1px solid var(--border);border-radius:var(--r);padding:5px 13px;font-family:'Noto Sans JP',sans-serif;font-size:11px;letter-spacing:.06em;color:var(--text2);cursor:pointer;transition:all .18s}
+.btn-filter.on{background:var(--text1);color:var(--surface);border-color:var(--text1)}
+
+/* SORT BAR */
+.sort-bar{display:flex;align-items:center;justify-content:flex-end;margin-bottom:10px;gap:6px}
+.sort-lbl{font-size:10px;letter-spacing:.1em;color:var(--text3)}
+.btn-sort{background:none;border:1px solid var(--border);border-radius:var(--r);padding:4px 11px;font-family:'Noto Sans JP',sans-serif;font-size:10px;letter-spacing:.08em;color:var(--text2);cursor:pointer;transition:all .18s}
+.btn-sort.on{background:var(--text1);color:var(--surface);border-color:var(--text1)}
+
+/* TASK CARD */
+.card{background:var(--surface);border:1px solid var(--border-light);border-left:2.5px solid var(--border);border-radius:var(--r);margin-bottom:14px;overflow:hidden;transition:border-color .6s}
+.card.s-safe{border-left-color:var(--safe)}
+.card.s-warning{border-left-color:var(--warn)}
+.card.s-urgent,.card.s-critical{border-left-color:var(--urgent)}
+.card.s-critical{animation:cP 3s ease-in-out infinite}
+@keyframes cP{0%,100%{border-left-color:var(--urgent)}50%{border-left-color:#C04848}}
+
+.card-top{padding:14px 18px 12px}
+/* FIX 1: Collapse */
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0}
+.card-head-main{display:flex;align-items:flex-start;gap:8px;flex:1;cursor:pointer;min-width:0;padding-bottom:10px}
+.collapse-arrow{font-size:10px;color:var(--text3);margin-top:5px;flex-shrink:0;transition:color .15s;user-select:none;padding:2px 3px}
+.card-head-main:hover .collapse-arrow{color:var(--text2)}
+.card-btns{display:flex;gap:4px;flex-shrink:0;padding-bottom:10px}
+/* FIX 2: Icon buttons */
+.ic-btn{width:28px;height:28px;background:none;border:1px solid var(--border);border-radius:2px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
+.ic-btn:hover{border-color:var(--text2);background:var(--surface2)}
+.ic-btn.del:hover{border-color:var(--urgent);background:var(--urgent-bg)}
+
+/* Collapsed summary */
+.card-collapsed-body{padding:0 18px 12px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px solid var(--border-light);padding-top:8px}
+.csum-stats{font-size:12px;color:var(--text2);letter-spacing:.02em}
+.csum-subs{font-size:11px;color:var(--text3)}
+
+/* COUNTDOWN */
+.card-expanded-body{border-top:1px solid var(--border-light);padding-top:12px;margin-top:0}
+.countdown{display:flex;gap:7px;margin-bottom:12px}
+.cbox{flex:1;text-align:center;background:var(--surface2);border:1px solid var(--border-light);border-radius:var(--r);padding:10px 4px 8px}
+.cnum{font-family:'Shippori Mincho',serif;font-size:28px;font-weight:400;line-height:1;display:block;transition:color .5s}
+.clbl{font-size:9px;letter-spacing:.12em;color:var(--text3);margin-top:3px;display:block}
+.s-safe .cnum{color:var(--safe)}
+.s-warning .cnum{color:var(--warn)}
+.s-urgent .cnum,.s-critical .cnum{color:var(--urgent)}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;letter-spacing:.1em;padding:3px 9px;border-radius:2px;margin-bottom:12px}
+.badge.safe{background:var(--safe-bg);color:var(--safe)}
+.badge.warning{background:var(--warn-bg);color:var(--warn)}
+.badge.urgent,.badge.critical{background:var(--urgent-bg);color:var(--urgent)}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.s-critical .dot{animation:db 1.2s ease-in-out infinite}
+@keyframes db{0%,100%{opacity:1}50%{opacity:.18}}
+
+.anchors{display:flex;gap:18px;padding:10px 0;border-top:1px solid var(--border-light);border-bottom:1px solid var(--border-light)}
+.anc{font-size:12px;color:var(--text2)}
+.anc strong{display:block;font-weight:500;font-size:15px;color:var(--text1)}
+
+/* SECTION TOGGLE */
+.sec-toggle{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.1em;color:var(--text3);background:none;border:none;cursor:pointer;padding:8px 18px;width:100%;text-align:left;transition:color .18s;border-top:1px solid var(--border-light)}
+.sec-toggle:hover{color:var(--text2)}
+.tline{flex:1;height:1px;background:var(--border-light)}
+
+/* CALENDAR */
+.cal-wrap{padding:14px 18px;border-top:1px solid var(--border-light)}
+.cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.cal-title{font-size:12px;font-weight:500;letter-spacing:.06em}
+.cal-nav-btn{background:none;border:1px solid var(--border);width:22px;height:22px;border-radius:2px;cursor:pointer;font-size:12px;color:var(--text2);display:flex;align-items:center;justify-content:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-hd{text-align:center;font-size:9px;letter-spacing:.1em;color:var(--text3);padding:3px 0}
+.cal-d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:10px;border-radius:2px;color:var(--text2)}
+.cal-d.today{background:var(--safe);color:#fff;font-weight:500}
+.cal-d.deadline{background:var(--urgent);color:#fff;font-weight:500}
+.cal-d.warn-day{box-shadow:inset 2px 0 0 var(--warn)}
+.cal-d.in-period{background:rgba(158,62,53,.07);color:var(--text1)}
+.cal-d.in-warn{background:rgba(176,122,66,.09)}
+.cal-d.other,.cal-d.past{opacity:.25}
+.cal-legend{display:flex;gap:12px;margin-top:7px;font-size:10px;color:var(--text3);align-items:center;flex-wrap:wrap}
+.leg-dot{width:8px;height:8px;border-radius:1px;display:inline-block}
+
+/* SUBTASKS */
+.sub-wrap{padding:12px 18px;border-top:1px solid var(--border-light)}
+.sub-prog-wrap{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.sub-prog{flex:1;height:7px;background:var(--border-light);border-radius:4px;overflow:hidden}
+.sub-prog-fill{height:100%;background:var(--safe);border-radius:4px;transition:width .4s}
+.sub-prog-pct{font-size:11px;color:var(--text3);white-space:nowrap;min-width:30px;text-align:right}
+.sub-prog-pct.complete{color:var(--safe);font-weight:500}
+.sub-item{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border-light)}
+.sub-item:last-of-type{border-bottom:none}
+.chk{width:13px;height:13px;border:1px solid var(--border);border-radius:2px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.chk.on{background:var(--safe);border-color:var(--safe)}
+.chk.on::after{content:'✓';font-size:8px;color:#fff}
+.sub-text{flex:1;font-size:13px}
+.sub-text.done{text-decoration:line-through;color:var(--text3)}
+.sub-date{font-size:10px;color:var(--text3);white-space:nowrap}
+.sub-date.overdue{color:var(--urgent)}
+.sub-date.today-due{color:var(--warn);font-weight:500}
+.sub-date.done-on{color:var(--safe)}
+.del-sub{background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;opacity:0;transition:opacity .15s;padding:2px 4px}
+.sub-item:hover .del-sub{opacity:1}
+.add-sub-row{display:flex;gap:8px;margin-top:9px;align-items:flex-end;flex-wrap:wrap}
+.in-sub{flex:1;min-width:120px;border:none;border-bottom:1px solid var(--border);background:transparent;padding:4px 0;font-family:'Noto Sans JP',sans-serif;font-size:12px;color:var(--text1);outline:none}
+.in-sub::placeholder{color:var(--text3)}
+.in-sub:focus{border-bottom-color:var(--text2)}
+.in-sub-date{border:none;border-bottom:1px solid var(--border);background:transparent;padding:4px 0;font-family:'Noto Sans JP',sans-serif;font-size:11px;color:var(--text2);outline:none;width:110px}
+.in-sub-date:focus{border-bottom-color:var(--text2)}
+.btn-sub-add{background:none;border:1px solid var(--border);border-radius:2px;padding:4px 10px;font-size:11px;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .18s;letter-spacing:.04em}
+.btn-sub-add:hover{border-color:var(--text1);color:var(--text1)}
+
+/* DRAG */
+.drag-handle{width:12px;flex-shrink:0;cursor:grab;color:var(--text3);font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;user-select:none}
+.sub-item:hover .drag-handle{opacity:1}
+.sub-item.dragging{opacity:.35;background:var(--surface2)}
+.sub-item.drag-over-top{box-shadow:0 -2px 0 var(--warn)}
+.sub-item.drag-over-bot{box-shadow:0 2px 0 var(--warn)}
+.card.task-dragging{opacity:.35;border-style:dashed}
+.card.task-drag-over-top{box-shadow:0 -3px 0 var(--warn)}
+.card.task-drag-over-bot{box-shadow:0 3px 0 var(--warn)}
+
+/* ACTION BUTTONS */
+.card-actions{padding:10px 18px 14px;border-top:1px solid var(--border-light);display:flex;flex-direction:column;gap:6px}
+.card-actions-row{display:flex;gap:8px}
+.btn-action{flex:1;padding:9px 10px;background:none;border:1px solid var(--border);border-radius:var(--r);font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.06em;color:var(--text2);cursor:pointer;text-align:center;transition:all .18s;white-space:nowrap}
+.btn-action:hover{background:var(--surface2);border-color:var(--text2);color:var(--text1)}
+.btn-complete{width:100%;padding:10px;background:none;border:1px solid var(--safe);border-radius:var(--r);font-family:'Noto Sans JP',sans-serif;font-size:13px;letter-spacing:.08em;color:var(--safe);cursor:pointer;text-align:center;transition:all .18s}
+.btn-complete:hover{background:var(--safe-bg)}
+.btn-archive{width:100%;padding:10px;background:none;border:1px solid var(--border);border-radius:var(--r);font-family:'Noto Sans JP',sans-serif;font-size:13px;letter-spacing:.08em;color:var(--text2);cursor:pointer;text-align:center;transition:all .18s}
+.btn-archive:hover{background:var(--surface2);border-color:var(--text2)}
+
+.expired-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.08em;padding:4px 10px;border-radius:2px;margin-bottom:10px;background:var(--urgent-bg);color:var(--urgent)}
+
+/* MODALS */
+.overlay{position:fixed;inset:0;background:rgba(44,41,37,.42);display:flex;align-items:center;justify-content:center;z-index:200;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s}
+.overlay.on{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:var(--r);padding:30px;max-width:460px;width:100%;transform:translateY(10px);transition:transform .25s;max-height:90vh;overflow-y:auto}
+.overlay.on .modal{transform:translateY(0)}
+.modal-tag{font-size:10px;letter-spacing:.16em;color:var(--text3);margin-bottom:14px}
+.modal-body{font-size:15px;line-height:1.85;color:var(--text1);margin-bottom:6px}
+.modal-attr{font-size:12px;color:var(--text3);font-style:italic;margin-bottom:22px}
+.modal-btns{display:flex;gap:8px}
+.btn-modal{flex:1;padding:10px;background:none;border:1px solid var(--border);border-radius:var(--r);font-family:'Noto Sans JP',sans-serif;font-size:12px;color:var(--text2);cursor:pointer;letter-spacing:.06em;transition:all .18s;text-align:center}
+.btn-modal:hover{background:var(--surface2);border-color:var(--text2)}
+.btn-modal.primary{background:var(--text1);color:var(--surface);border-color:var(--text1)}
+.btn-modal.primary:hover{opacity:.82}
+
+/* FOCUS MODE */
+.focus-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:300;opacity:0;pointer-events:none;transition:opacity .35s;padding:40px 24px}
+.focus-overlay.on{opacity:1;pointer-events:all}
+.focus-name{font-family:'Shippori Mincho',serif;font-size:20px;font-weight:400;letter-spacing:.14em;color:var(--text2);margin-bottom:10px;text-align:center}
+.focus-dl{font-size:12px;color:var(--text3);letter-spacing:.06em;margin-bottom:40px;text-align:center}
+.focus-cd{display:flex;gap:16px;margin-bottom:16px}
+.focus-box{text-align:center;min-width:80px}
+.focus-num{font-family:'Shippori Mincho',serif;font-size:72px;font-weight:400;line-height:1;display:block;color:var(--text1)}
+.focus-lbl{font-size:11px;letter-spacing:.16em;color:var(--text3);margin-top:6px;display:block}
+.focus-badge{margin:20px 0 40px;font-size:11px;letter-spacing:.12em;padding:4px 14px;border-radius:2px}
+.focus-badge.safe{background:var(--safe-bg);color:var(--safe)}
+.focus-badge.warning{background:var(--warn-bg);color:var(--warn)}
+.focus-badge.urgent,.focus-badge.critical{background:var(--urgent-bg);color:var(--urgent)}
+.btn-focus-close{background:none;border:1px solid var(--border);border-radius:var(--r);padding:10px 32px;font-family:'Noto Sans JP',sans-serif;font-size:12px;letter-spacing:.1em;color:var(--text2);cursor:pointer;transition:all .18s}
+.btn-focus-close:hover{border-color:var(--text1);color:var(--text1)}
+
+/* FULL-PAGE OVERLAYS */
+.full-overlay{position:fixed;inset:0;background:var(--bg);z-index:250;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .25s}
+.full-overlay.on{opacity:1;pointer-events:all}
+.full-wrap{max-width:660px;margin:0 auto;padding:48px 24px 80px}
+.full-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.full-title{font-family:'Shippori Mincho',serif;font-size:20px;font-weight:400;letter-spacing:.1em}
+.full-subtitle{font-size:10px;color:var(--text3);letter-spacing:.14em;margin-top:2px}
+.section-lbl{font-size:10px;letter-spacing:.16em;color:var(--text3);margin-bottom:12px;margin-top:4px}
+
+/* RECORD PAGE */
+.record-group{margin-bottom:28px}
+.record-group-name{font-size:12px;font-weight:500;letter-spacing:.06em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border-light);color:var(--text2)}
+.record-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-light);font-size:13px}
+.record-item:last-child{border-bottom:none}
+.record-dot{width:7px;height:7px;border-radius:50%;background:var(--safe);flex-shrink:0}
+.record-dot.pending{background:var(--border)}
+.record-dot.overdue{background:var(--urgent)}
+.record-txt{flex:1}
+.record-date{font-size:11px;color:var(--text3);white-space:nowrap}
+.record-date.done-on{color:var(--safe)}
+.record-date.overdue{color:var(--urgent)}
+.record-empty{text-align:center;padding:60px 0;color:var(--text3);font-size:13px;letter-spacing:.06em}
+.record-stats{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+.stat-box{flex:1;min-width:80px;background:var(--surface);border:1px solid var(--border-light);border-radius:var(--r);padding:14px;text-align:center}
+.stat-num{font-family:'Shippori Mincho',serif;font-size:26px;display:block;color:var(--text1)}
+.stat-lbl{font-size:10px;color:var(--text3);letter-spacing:.1em;margin-top:2px;display:block}
+.stat-box.s{border-left:2px solid var(--safe)}
+.stat-box.p{border-left:2px solid var(--border)}
+.stat-box.t{border-left:2px solid var(--warn)}
+.comp-task-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-light);font-size:13px}
+.comp-task-item:last-child{border-bottom:none}
+.comp-check{width:16px;height:16px;background:var(--safe);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:9px}
+.comp-task-name{flex:1;font-weight:500}
+.comp-task-date{font-size:11px;color:var(--safe);white-space:nowrap}
+/* FIX 6: restore button */
+.btn-restore{background:none;border:1px solid var(--border);border-radius:2px;padding:3px 8px;font-size:11px;color:var(--text3);cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .18s;white-space:nowrap;flex-shrink:0}
+.btn-restore:hover{border-color:var(--warn);color:var(--warn)}
+
+/* OVERVIEW PAGE */
+/* Global Calendar */
+.gcal-box{background:var(--surface);border:1px solid var(--border-light);border-radius:var(--r);padding:16px;margin-bottom:20px}
+.gcal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.gcal-title{font-size:13px;font-weight:500;letter-spacing:.06em}
+.gcal-nav-btn{background:none;border:1px solid var(--border);width:24px;height:24px;border-radius:2px;cursor:pointer;font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center}
+.gcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.gcal-hd{text-align:center;font-size:9px;letter-spacing:.1em;color:var(--text3);padding:3px 0}
+.gcal-d{display:flex;flex-direction:column;align-items:center;border-radius:3px;padding:3px 2px 4px;min-height:36px;font-size:10px;color:var(--text2);position:relative;cursor:default}
+.gcal-d.today{background:var(--safe-bg)}
+.gcal-d.today .gcal-dn{background:var(--safe);color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center}
+.gcal-d.other,.gcal-d.past{opacity:.22}
+.gcal-dn{font-size:10px;line-height:1;margin-bottom:2px;width:18px;height:18px;display:flex;align-items:center;justify-content:center}
+.gcal-dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;margin-top:1px}
+.gcal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.gcal-dot.safe{background:var(--safe)}
+.gcal-dot.warning{background:var(--warn)}
+.gcal-dot.urgent,.gcal-dot.critical,.gcal-dot.expired{background:var(--urgent)}
+/* Deadline list */
+.dl-list{background:var(--surface);border:1px solid var(--border-light);border-radius:var(--r);overflow:hidden;margin-bottom:24px}
+.dl-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border-light);font-size:13px}
+.dl-item:last-child{border-bottom:none}
+.dl-bar{width:3px;height:32px;border-radius:2px;flex-shrink:0}
+.dl-bar.safe{background:var(--safe)}
+.dl-bar.warning{background:var(--warn)}
+.dl-bar.urgent,.dl-bar.critical,.dl-bar.expired{background:var(--urgent)}
+.dl-name{flex:1;font-weight:500}
+.dl-date{font-size:11px;color:var(--text3)}
+.dl-badge{font-size:10px;letter-spacing:.08em;padding:2px 7px;border-radius:2px}
+.dl-badge.safe{background:var(--safe-bg);color:var(--safe)}
+.dl-badge.warning{background:var(--warn-bg);color:var(--warn)}
+.dl-badge.urgent,.dl-badge.critical,.dl-badge.expired{background:var(--urgent-bg);color:var(--urgent)}
+/* Subtask overview */
+.ov-group{margin-bottom:22px}
+.ov-group-lbl{font-size:10px;letter-spacing:.14em;color:var(--text3);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border-light)}
+.ov-sub-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-light);font-size:13px}
+.ov-sub-item:last-child{border-bottom:none}
+.ov-task-tag{font-size:10px;color:var(--text3);background:var(--surface2);border-radius:2px;padding:1px 6px;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.ov-sub-date{font-size:10px;color:var(--text3);white-space:nowrap}
+.ov-sub-date.overdue{color:var(--urgent)}
+.ov-sub-date.today-due{color:var(--warn);font-weight:500}
+.ov-empty{font-size:12px;color:var(--text3);letter-spacing:.06em;padding:16px 0}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text1);color:var(--surface);padding:10px 16px;border-radius:var(--r);display:flex;gap:12px;align-items:center;font-size:12px;transition:transform .3s;z-index:500;white-space:nowrap;pointer-events:none;letter-spacing:.04em}
+.toast.show{transform:translateX(-50%) translateY(0);pointer-events:all}
+.toast-undo{background:none;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:2px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;letter-spacing:.04em}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 0;color:var(--text3)}
+.empty p{font-size:14px;letter-spacing:.06em}
+.empty small{font-size:11px;margin-top:6px;display:block}
+
+@media(max-width:480px){
+  .form-grid{grid-template-columns:1fr}
+  .countdown{gap:4px}.cnum{font-size:22px}
+  .focus-num{font-size:48px}.focus-box{min-width:56px}
+  header{flex-direction:column;align-items:flex-start;gap:12px}
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="mainWrap">
+<header>
+  <div class="hdr-left">
+    <h1>do it.</h1>
+    <p>DEADLINE TRACKER — ADHD EDITION</p>
+  </div>
+  <div class="hdr-nav">
+    <button class="nav-btn on" id="btnMain" onclick="showMain()">任務</button>
+    <button class="nav-btn" id="btnOv" onclick="showOverview()">總覽</button>
+    <button class="nav-btn" id="btnRec" onclick="showRecord()">完成記錄</button>
+  </div>
+</header>
+
+<div class="today-banner" id="todayBanner">
+  <div class="today-title">TODAY — 今日需完成</div>
+  <div id="todayList"></div>
+</div>
+
+<div class="form-box">
+  <div class="form-label">新增任務</div>
+  <div class="form-grid full">
+    <div class="fg"><label>任務名稱</label>
+      <input id="iName" type="text" placeholder="">
+    </div>
+  </div>
+  <div class="form-grid">
+    <div class="fg"><label>截止日期 &amp; 時間</label><input id="iDl" type="datetime-local"></div>
+    <div class="fg"><label>警戒線（幾多日前）</label><input id="iWarn" type="number" min="1" max="365"></div>
+  </div>
+  <button class="btn-add" onclick="addTask()">＋ 加入任務</button>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-lbl">顯示</span>
+  <button class="btn-filter on" id="fAll" onclick="setFilter('all')">全部</button>
+  <button class="btn-filter" id="fToday" onclick="setFilter('today')">今日 / 緊急</button>
+  <button class="btn-filter" id="fUrgent" onclick="setFilter('urgent')">警戒中</button>
+</div>
+<div class="sort-bar">
+  <span class="sort-lbl">排序</span>
+  <button class="btn-sort" id="btnSort" onclick="toggleSort()">按緊急程度</button>
+  <button class="btn-sort on" id="btnManual" onclick="toggleManual()">手動排列</button>
+</div>
+<div id="taskList"></div>
+</div>
+
+<!-- OVERVIEW PAGE -->
+<div class="full-overlay" id="overviewOverlay">
+  <div class="full-wrap">
+    <div class="full-header">
+      <div><div class="full-title">總覽</div><div class="full-subtitle">OVERVIEW</div></div>
+      <button class="nav-btn" onclick="showMain()">← 返回任務</button>
+    </div>
+    <div id="overviewContent"></div>
+  </div>
+</div>
+
+<!-- RECORD PAGE -->
+<div class="full-overlay" id="recordOverlay">
+  <div class="full-wrap">
+    <div class="full-header">
+      <div><div class="full-title">完成記錄</div><div class="full-subtitle">COMPLETION LOG</div></div>
+      <button class="nav-btn" onclick="showMain()">← 返回任務</button>
+    </div>
+    <div id="recordContent"></div>
+  </div>
+</div>
+
+<!-- TIP / QUOTE MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-tag" id="mTag"></div>
+    <div class="modal-body" id="mBody"></div>
+    <div class="modal-attr" id="mAttr"></div>
+    <div class="modal-btns">
+      <button class="btn-modal" onclick="nextItem()">換一條 →</button>
+      <button class="btn-modal" onclick="closeModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="overlay" id="editOverlay" onclick="closeEdit()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-tag">✎ 編輯任務</div>
+    <div class="form-grid full" style="margin-bottom:10px">
+      <div class="fg"><label>任務名稱</label><input id="eName" type="text"></div>
+    </div>
+    <div class="form-grid" style="margin-bottom:18px">
+      <div class="fg"><label>截止日期 &amp; 時間</label><input id="eDl" type="datetime-local"></div>
+      <div class="fg"><label>警戒線（幾多日前）</label><input id="eWarn" type="number" min="1" max="365"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-modal primary" onclick="saveEdit()">儲存</button>
+      <button class="btn-modal" onclick="closeEdit()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOCUS MODE -->
+<div class="focus-overlay" id="focusOverlay">
+  <div class="focus-name" id="fName"></div>
+  <div class="focus-dl" id="fDl"></div>
+  <div class="focus-cd">
+    <div class="focus-box"><span class="focus-num" id="fD">0</span><span class="focus-lbl">天</span></div>
+    <div class="focus-box"><span class="focus-num" id="fH">00</span><span class="focus-lbl">時</span></div>
+    <div class="focus-box"><span class="focus-num" id="fM">00</span><span class="focus-lbl">分</span></div>
+    <div class="focus-box"><span class="focus-num" id="fS">00</span><span class="focus-lbl">秒</span></div>
+  </div>
+  <div class="focus-badge" id="fBadge"></div>
+  <button class="btn-focus-close" onclick="closeFocus()">結束專注模式</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toastMsg"></span>
+  <button class="toast-undo" id="toastUndoBtn" onclick="undoDelete()">撤銷</button>
+</div>
+
+<script>
+/* ===== DATA: 50 TIPS ===== */
+const TIPS = [
+  {t:"「2分鐘法則」：如果開始呢件事少於2分鐘，立即做，唔好等。萬事起頭難，開始咗就係一半。"},
+  {t:"「Body Double」：打開 YouTube 搜尋「study with me」，有人陪你做嘢，ADHD 大腦更易進入狀態。"},
+  {t:"「腦袋傾瀉」：拎張紙，把腦袋入面所有嘢全部寫出嚟，唔分輕重，清空後先再開始工作。"},
+  {t:"「番茄鐘 ADHD版」：設25分鐘計時，目標唔係做好，係「開始做」。入咗狀態唔好停，無限延伸都得。"},
+  {t:"「最醜陋的第一步」：唔使做好，唔使做對，只需要打開文件、寫第一個字。醜稿好過無稿。"},
+  {t:"「環境切換」：換個地方坐。咖啡廳、圖書館、走廊都得。ADHD 大腦需要新刺激作為啟動燃料。"},
+  {t:"「拆細到荒謬」：唔係「做report」，係「打開Word」→「寫標題」→「打入日期」→「寫第一句話」。"},
+  {t:"「物理隔離手機」：唔係靜音，係放到另一個房間。每次拿手機都要起身行去，阻力足夠就夠。"},
+  {t:"「時間可視化」：買個廚房計時器放桌面。ADHD 大腦需要睇到時間在流動，電話計時器效果差。"},
+  {t:"「情緒先行」：唔使強迫自己「想做」，只需要坐喺桌前5分鐘，之後再決定。通常坐低咗就會開始。"},
+  {t:"「先設定獎勵」：決定好做完去食乜、去玩咩，先訂好。讓大腦有嘢期待，dopamine 先行帶動行動。"},
+  {t:"「高刺激背景音」：Lo-fi beats、brown noise、white noise。ADHD 大腦太安靜反而分心。"},
+  {t:"「站立工作」：如果坐著做唔到，試下站著做。身體狀態唔同，腦袋運作都有變化。"},
+  {t:"「社交壓力啟動」：WhatsApp 一個朋友講「我今日X點前要完成XXX，到時同你講結果。」外部 accountability 非常有效。"},
+  {t:"「接受醜陋期」：所有嘢開頭都係爛的。ADHD 尤其容易因為完美主義而唔肯開始。爛稿好過無稿。"},
+  {t:"「今日唯一任務」：唔係問「我今日要做幾多」，係問「今日最重要嘅一件事係咩」，只做那一件。"},
+  {t:"「任務啟動儀式」：設一個固定動作，例如沖咖啡、戴耳機、寫下今日目標。大腦靠條件反射進入狀態。"},
+  {t:"「刺激配對法」：只有做嗰個任務時先可以食最喜歡嘅零食或聽最喜歡嘅歌。製造聯結。"},
+  {t:"「5秒起身法」：數5、4、3、2、1，然後起身做第一個動作。唔需要思考，只需要移動身體。"},
+  {t:"「重新框架」：唔係「我要做呢份report」，係「我要花20分鐘寫一個草稿，爛都無所謂」。前者嚇親自己，後者易入手。"},
+  {t:"「完成清單」：每次完成任何事，不論多小，都寫落去。ADHD 大腦需要看到成果，才有動力繼續。"},
+  {t:"「限時版本」：告訴自己「只做30分鐘的版本，唔係完整版」。降低自己對結果的期望，反而更容易開始。"},
+  {t:"「視覺提示法」：把最重要的任務寫係大張便利貼，貼係螢幕邊。ADHD 大腦「眼不見心不想」，視覺提示比任何 app 更直接。"},
+  {t:"「大聲唸出嚟」：做嘢之前大聲講「我而家要做嘅係…」。語言化動作幫助 ADHD 大腦把意圖轉化為行動。"},
+  {t:"「Eat the Frog」：早上第一件事做最難最怕嗰個任務。大腦能量最高係早上，做完最難的，之後全日輕鬆。"},
+  {t:"「單分頁原則」：瀏覽器只開一個分頁。每多一個分頁就係一個分心入口，關掉佢。"},
+  {t:"「語音備忘」：唔想打字？拎起電話錄音講出你的想法，之後再整理。說話比打字更快更自然。"},
+  {t:"「前一晚鋪陳」：前晚把所有需要的嘢準備好放桌面。ADHD 大腦早上啟動慢，減少出門前嘅摩擦。"},
+  {t:"「身體移動重置」：做唔到嘢？起身做10個深蹲。身體運動直接提升 dopamine，效果立竿見影。"},
+  {t:"「過渡小儀式」：兩個任務之間固定做一件小事（飲水、伸展）。幫助大腦識別「任務切換」信號。"},
+  {t:"「情緒承認法」：開始之前，先承認「我而家覺得好難開始」。唔係否定情緒，而係讓它過去再行動。"},
+  {t:"「縮細視窗」：把工作視窗縮細，只顯示正在做的嘢。全屏環境是四周都係分心陷阱。"},
+  {t:"「外部鬧鐘」：重要事情設重複鬧鐘，唔好依賴自己「記得」。ADHD 大腦時間感天生比別人弱。"},
+  {t:"「睡眠第一」：睡眠不足令 ADHD 症狀加重。任何技巧都比不上睡飽覺的大腦。犧牲睡眠追 deadline 係賠本生意。"},
+  {t:"「運動等於藥」：20分鐘跑步或快步走，效果等同一劑利他林。任何運動都算，出去行吓都好。"},
+  {t:"「完成定義法」：開始前先定義「完成」係點。「寫完 introduction 段」比「做 report」具體，更容易啟動。"},
+  {t:"「小勝利日記」：每天睡前寫下3件今日做到嘅事。唔論大小，ADHD 大腦需要睇見自己的進步。"},
+  {t:"「刻意斷網時段」：每日設一個1-2小時完全無網絡嘅時段。Wi-Fi 係合法毒品，要主動切斷。"},
+  {t:"「尋找你的黃金時段」：記錄自己幾點最有能量，固定把重要工作排係嗰個時段。"},
+  {t:"「接受唔完美」：60分的完成好過100分的永遠等待。唔係你唔夠努力，係你需要先完成再改善。"},
+  {t:"「同伴自習」：約一個朋友一起自習（或用 Discord 視頻）。有人同在場，大腦更容易進入工作狀態。"},
+  {t:"「咖啡廳聲音」：搜尋「Coffitivity」或 YouTube 咖啡廳環境音。適當嘅背景聲音幫助某些 ADHD 人專注。"},
+  {t:"「拒絕多工處理」：一次只做一件事。多工對 ADHD 大腦是幻覺，實際上係反覆切換令效率更低。"},
+  {t:"「用計時器取代意志力」：意志力是有限資源。用25分鐘計時器代替「我要努力撐落去」的想法。"},
+  {t:"「重要事寫紙上」：把最重要嘅一件事手寫係紙上，放桌面最顯眼嘅地方。數位通知容易被忽略。"},
+  {t:"「開始前深呼吸3次」：做3次深呼吸，啟動副交感神經系統。對焦慮和啟動阻力特別有效。"},
+  {t:"「獎勵即時化」：完成一個子任務後立即給自己小獎勵（休息5分鐘、食一粒糖）。ADHD 大腦需要即時反饋。"},
+  {t:"「任務太大？切一半」：如果任務感覺太大，直接把它切成兩件更小的事。再大就再切，直到感覺「好似得㗎」為止。"},
+  {t:"「接受自己的腦袋」：ADHD 唔係缺陷，係不同的腦袋結構。你需要的不是更努力，而係更適合你的系統。"},
+  {t:"「設最後警戒線」：在截止日前一天設一個「私人假截止日」。給自己一個緩衝，減少最後衝線的焦慮。"},
+];
+
+/* ===== DATA: 50 QUOTES ===== */
+const QUOTES = [
+  {t:"The secret of getting ahead is getting started.", a:"— Mark Twain"},
+  {t:"Done is better than perfect.", a:"— Sheryl Sandberg"},
+  {t:"You don't have to be great to start, but you have to start to be great.", a:"— Zig Ziglar"},
+  {t:"You don't have to see the whole staircase, just take the first step.", a:"— Martin Luther King Jr."},
+  {t:"An ounce of action is worth a ton of theory.", a:"— Ralph Waldo Emerson"},
+  {t:"Start where you are. Use what you have. Do what you can.", a:"— Arthur Ashe"},
+  {t:"It does not matter how slowly you go as long as you do not stop.", a:"— Confucius"},
+  {t:"The future depends on what you do today.", a:"— Mahatma Gandhi"},
+  {t:"It always seems impossible until it's done.", a:"— Nelson Mandela"},
+  {t:"The only way out is through.", a:"— Robert Frost"},
+  {t:"We are what we repeatedly do. Excellence is not an act, but a habit.", a:"— Aristotle"},
+  {t:"Imperfect action beats perfect inaction every time.", a:"— Harry S. Truman"},
+  {t:"The way to get started is to quit talking and begin doing.", a:"— Walt Disney"},
+  {t:"Motivation is what gets you started. Habit is what keeps you going.", a:"— Jim Ryun"},
+  {t:"Showing up is 80 percent of life.", a:"— Woody Allen"},
+  {t:"Progress, not perfection.", a:"— Unknown"},
+  {t:"Discipline is choosing between what you want now and what you want most.", a:"— Abraham Lincoln"},
+  {t:"If you're going through hell, keep going.", a:"— Winston Churchill"},
+  {t:"Every accomplishment starts with the decision to try.", a:"— John F. Kennedy"},
+  {t:"The secret of your future is hidden in your daily routine.", a:"— Mike Murdock"},
+  {t:"You are braver than you believe, stronger than you seem.", a:"— A.A. Milne"},
+  {t:"Small steps every day add up to big results.", a:"— Unknown"},
+  {t:"Consistency beats perfection every single time.", a:"— Unknown"},
+  {t:"You don't need to be perfect to be amazing.", a:"— Unknown"},
+  {t:"The only failure is not trying.", a:"— George Clooney"},
+  {t:"千里之行，始於足下。", a:"— 老子《道德經》"},
+  {t:"不積跬步，無以至千里；不積小流，無以成江海。", a:"— 荀子《勸學》"},
+  {t:"明日復明日，明日何其多。我生待明日，萬事成蹉跎。", a:"— 文嘉《明日歌》"},
+  {t:"勤能補拙是良訓，一分辛苦一分才。", a:"— 華羅庚"},
+  {t:"行動是治療恐懼的良藥，而猶豫拖延將不斷滋養恐懼。", a:"— 戴爾·卡耐基"},
+  {t:"種一棵樹最好的時間是十年前，其次是現在。", a:"— 中國諺語"},
+  {t:"哪怕天塌下來，也要把眼前這件事做完。", a:"— 佚名"},
+  {t:"天下事有難易乎？為之，則難者亦易矣；不為，則易者亦難矣。", a:"— 彭端淑《為學》"},
+  {t:"業精於勤，荒於嬉；行成於思，毀於隨。", a:"— 韓愈"},
+  {t:"書山有路勤為徑，學海無涯苦作舟。", a:"— 韓愈"},
+  {t:"有志者事竟成。", a:"— 后漢書"},
+  {t:"莫等閒，白了少年頭，空悲切。", a:"— 岳飛《滿江紅》"},
+  {t:"志不強者智不達。", a:"— 墨子"},
+  {t:"逆水行舟，不進則退。", a:"— 中國諺語"},
+  {t:"精誠所至，金石為開。", a:"— 中國諺語"},
+  {t:"誰道人生無再少？門前流水尚能西！", a:"— 蘇軾《浣溪沙》"},
+  {t:"失敗是成功之母。", a:"— 中國諺語"},
+  {t:"一步一腳印，冇話唔得㗎。", a:"— 廣東俗語"},
+  {t:"今日唔做，聽日後悔。", a:"— 廣東俗語"},
+  {t:"唔怕行得慢，最怕唔行。", a:"— 廣東俗語"},
+  {t:"細水長流，積少成多。", a:"— 廣東諺語"},
+  {t:"做得就做，唔做就唔好諗。", a:"— 香港智慧"},
+  {t:"一日唔死，就有得做。", a:"— 廣東俗語"},
+  {t:"人一能之，己百之；人十能之，己千之。", a:"— 中庸"},
+  {t:"得過且過唔係辦法，起行先係出路。", a:"— 佚名"},
+];
+
+/* ===== STATE ===== */
+let tasks = JSON.parse(localStorage.getItem('dt_v7')||'[]');
+let completedTasks = JSON.parse(localStorage.getItem('dt_v7_done')||'[]');
+let mType='', mIdx=0, focusIdx=-1, focusTick=null;
+let sortMode = 'manual';
+let filterMode = 'all';
+let dragSubTi=-1, dragSubSi=-1, dragTkI=-1;
+let editIdx = -1;
+let undoItem = null, undoTimeout = null;
+let globalCalYear = new Date().getFullYear();
+let globalCalMonth = new Date().getMonth();
+
+/* ===== UTIL ===== */
+const pad = n => String(Math.floor(n)).padStart(2,'0');
+const save = () => {
+  localStorage.setItem('dt_v7', JSON.stringify(tasks));
+  localStorage.setItem('dt_v7_done', JSON.stringify(completedTasks));
+};
+const months = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+const wd = ['日','一','二','三','四','五','六'];
+
+function fmtDL(iso){const d=new Date(iso);return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（週${wd[d.getDay()]}）${pad(d.getHours())}:${pad(d.getMinutes())}`;}
+function fmtDate(iso){if(!iso)return'';const d=new Date(iso);return`${d.getMonth()+1}/${d.getDate()}`;}
+function fmtDateFull(iso){if(!iso)return'';const d=new Date(iso);return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;}
+function isToday(iso){if(!iso)return false;const d=new Date(iso),n=new Date();return d.toDateString()===n.toDateString();}
+function isPast(iso){if(!iso)return false;const d=new Date(iso);d.setHours(23,59,59);return d<new Date()&&!isToday(iso);}
+function getLeft(dl){const diff=new Date(dl).getTime()-Date.now();if(diff<=0)return{d:0,h:0,m:0,s:0,ex:true};return{d:Math.floor(diff/86400000),h:Math.floor(diff%86400000/3600000),m:Math.floor(diff%3600000/60000),s:Math.floor(diff%60000/1000),ex:false};}
+function getStatus(tk){const diff=new Date(tk.deadline).getTime()-Date.now();const days=diff/86400000,w=tk.warn||14;if(diff<=0)return'expired';if(days<=1.5)return'critical';if(days<=w)return'urgent';if(days<=w*2)return'warning';return'safe';}
+const STATUS_LBL={safe:'時間充足',warning:'留意進度',urgent:'緊急',critical:'非常緊急',expired:'已截止'};
+function sleeps(dl){const n=new Date(),d=new Date(dl);const nm=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);const dm=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);return Math.max(0,Math.ceil((dm-nm)/86400000));}
+function weekends(dl){let c=0;const cur=new Date();cur.setHours(0,0,0,0);const end=new Date(dl);end.setHours(0,0,0,0);const d=new Date(cur);while(d<=end){if(d.getDay()===6)c++;d.setDate(d.getDate()+1);}return c;}
+
+/* ===== TODAY BANNER ===== */
+function renderToday(){
+  const banner=document.getElementById('todayBanner');
+  const list=document.getElementById('todayList');
+  const items=[];
+  tasks.forEach((tk,ti)=>{
+    const st=getStatus(tk);
+    if(st==='critical'||isToday(tk.deadline)) items.push({type:'main',txt:tk.name,st,ti});
+  });
+  tasks.forEach((tk,ti)=>{
+    (tk.subs||[]).forEach((s,si)=>{
+      if(!s.done&&s.due&&isToday(s.due)) items.push({type:'sub',txt:s.txt,taskName:tk.name,ti,si});
+    });
+  });
+  if(!items.length){banner.classList.remove('show');return;}
+  banner.classList.add('show');
+  list.innerHTML=items.map(it=>{
+    if(it.type==='main') return`<div class="today-main-item"><span>📌</span><span>${it.txt}</span><span class="today-main-badge">${STATUS_LBL[it.st]||''}</span></div>`;
+    return`<div class="today-item"><div class="today-chk" onclick="todayCheck(${it.ti},${it.si},this)"></div><span>${it.txt}</span><span class="today-task">${it.taskName}</span></div>`;
+  }).join('');
+}
+function todayCheck(ti,si,el){el.classList.toggle('on');tasks[ti].subs[si].done=!tasks[ti].subs[si].done;tasks[ti].subs[si].doneOn=tasks[ti].subs[si].done?new Date().toISOString().split('T')[0]:null;save();render();}
+
+/* ===== FILTER ===== */
+function setFilter(mode){
+  filterMode=mode;
+  ['fAll','fToday','fUrgent'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById({all:'fAll',today:'fToday',urgent:'fUrgent'}[mode]).classList.add('on');
+  render();
+}
+
+/* ===== RENDER ===== */
+function render(){
+  const list=document.getElementById('taskList');
+  const order=['expired','critical','urgent','warning','safe'];
+  let worst='safe';
+  tasks.forEach(t=>{const s=getStatus(t);if(order.indexOf(s)<order.indexOf(worst))worst=s;});
+  document.body.className='s-'+(worst==='expired'?'urgent':worst);
+  renderToday();
+  document.getElementById('btnSort').className='btn-sort'+(sortMode==='urgency'?' on':'');
+  document.getElementById('btnManual').className='btn-sort'+(sortMode==='manual'?' on':'');
+  if(!tasks.length){list.innerHTML='<div class="empty"><p>未有任何任務</p><small>加入你的第一個截止日期</small></div>';return;}
+  let displayOrder=tasks.map((_,i)=>i);
+  if(sortMode==='urgency'){const urgOrder=['critical','urgent','warning','safe','expired'];displayOrder.sort((a,b)=>urgOrder.indexOf(getStatus(tasks[a]))-urgOrder.indexOf(getStatus(tasks[b])));}
+  if(filterMode==='today') displayOrder=displayOrder.filter(i=>{const st=getStatus(tasks[i]);return st==='critical'||isToday(tasks[i].deadline);});
+  else if(filterMode==='urgent') displayOrder=displayOrder.filter(i=>{const st=getStatus(tasks[i]);return st==='critical'||st==='urgent'||st==='warning';});
+  if(!displayOrder.length){list.innerHTML='<div class="empty"><p>暫無符合條件的任務</p><small>切換「全部」查看所有任務</small></div>';return;}
+  list.innerHTML='';
+  displayOrder.forEach(i=>{
+    const card=buildCard(tasks[i],i);
+    if(sortMode==='manual'){
+      card.setAttribute('draggable','true');
+      card.addEventListener('dragstart',e=>{dragTkI=i;card.classList.add('task-dragging');e.dataTransfer.effectAllowed='move';});
+      card.addEventListener('dragend',()=>{card.classList.remove('task-dragging');dragTkI=-1;list.querySelectorAll('.card').forEach(c=>c.classList.remove('task-drag-over-top','task-drag-over-bot'));});
+      card.addEventListener('dragover',e=>{if(dragTkI<0||dragTkI===i)return;e.preventDefault();const mid=card.getBoundingClientRect().top+card.offsetHeight/2;list.querySelectorAll('.card').forEach(c=>c.classList.remove('task-drag-over-top','task-drag-over-bot'));card.classList.add(e.clientY<mid?'task-drag-over-top':'task-drag-over-bot');card._dropPos=e.clientY<mid?'before':'after';});
+      card.addEventListener('dragleave',()=>{card.classList.remove('task-drag-over-top','task-drag-over-bot');});
+      card.addEventListener('drop',e=>{e.preventDefault();if(dragTkI<0||dragTkI===i)return;card.classList.remove('task-drag-over-top','task-drag-over-bot');const pos=card._dropPos||'after';const[moved]=tasks.splice(dragTkI,1);const newI=i>dragTkI?i-1:i;tasks.splice(pos==='before'?newI:newI+1,0,moved);save();render();});
+    }
+    list.appendChild(card);
+  });
+}
+
+/* ===== BUILD CARD ===== */
+function buildCard(tk,i){
+  const st=getStatus(tk);
+  const t=getLeft(tk.deadline);
+  const subs=tk.subs||[];
+  const done=subs.filter(s=>s.done).length;
+  const pct=subs.length?done/subs.length*100:0;
+  const calOn=tk.calOn||false;
+  const subOn=tk.subOn!==false;
+  const collapsed=tk.collapsed||false;
+
+  const el=document.createElement('div');
+  el.className=`card s-${st}`;
+
+  /* --- Collapsed summary --- */
+  const collapsedSummary=`<div class="card-collapsed-body">
+    <span class="badge ${st}" style="margin-bottom:0"><span class="dot"></span>${STATUS_LBL[st]||''}</span>
+    ${!t.ex?`<span class="csum-stats">${sleeps(tk.deadline)}覺 · ${weekends(tk.deadline)}週末 · ${t.d}日</span>`:''}
+    ${subs.length?`<span class="csum-subs">${done}/${subs.length} 子任務</span>`:''}
+  </div>`;
+
+  /* --- Full expanded content --- */
+  let top='';
+  if(t.ex){
+    top=`<div class="expired-badge"><span class="dot"></span>已過截止日期</div>`;
+  } else {
+    top=`<div class="countdown">
+      <div class="cbox"><span class="cnum" id="d-${i}">${t.d}</span><span class="clbl">天</span></div>
+      <div class="cbox"><span class="cnum" id="h-${i}">${pad(t.h)}</span><span class="clbl">時</span></div>
+      <div class="cbox"><span class="cnum" id="m-${i}">${pad(t.m)}</span><span class="clbl">分</span></div>
+      <div class="cbox"><span class="cnum" id="s-${i}">${pad(t.s)}</span><span class="clbl">秒</span></div>
+    </div>
+    <div class="badge ${st}"><span class="dot"></span>${STATUS_LBL[st]||''}</div>
+    <div class="anchors">
+      <div class="anc"><strong>${sleeps(tk.deadline)}</strong>覺</div>
+      <div class="anc"><strong>${weekends(tk.deadline)}</strong>個週末</div>
+      <div class="anc"><strong>${t.d}</strong>日</div>
+    </div>`;
+  }
+
+  const calHTML=calOn?buildCal(tk,i):'';
+  const pctRound=Math.round(pct);
+  const subHTML=subOn?`<div class="sub-wrap">
+    ${subs.length?`<div class="sub-prog-wrap"><div class="sub-prog"><div class="sub-prog-fill" style="width:${pct}%"></div></div><span class="sub-prog-pct${pct===100?' complete':''}">${pctRound===100?'✓ 全完成':pctRound+'%'}</span></div>`:''}
+    ${subs.map((s,si)=>{
+      let dc='sub-date',dlabel='';
+      if(s.done&&s.doneOn){dc='sub-date done-on';dlabel=`完成 ${fmtDate(s.doneOn)}`;}
+      else if(s.due){if(isPast(s.due)&&!s.done){dc='sub-date overdue';dlabel=fmtDate(s.due)+' !';}else if(isToday(s.due)&&!s.done){dc='sub-date today-due';dlabel='今日';}else{dlabel=fmtDate(s.due);}}
+      return`<div class="sub-item" draggable="true" ondragstart="subDragStart(${i},${si},event)" ondragover="subDragOver(${i},${si},event)" ondrop="subDrop(${i},${si},event)" ondragend="subDragEnd(event)">
+        <div class="drag-handle" title="拖拉排序">⠿</div>
+        <div class="chk ${s.done?'on':''}" onclick="toggleSub(${i},${si})"></div>
+        <span class="sub-text ${s.done?'done':''}">${s.txt}</span>
+        ${dlabel?`<span class="${dc}">${dlabel}</span>`:''}
+        <button class="del-sub" onclick="delSub(${i},${si})">×</button>
+      </div>`;
+    }).join('')}
+    <div class="add-sub-row">
+      <input class="in-sub" id="si-${i}" placeholder="加子任務…" onkeydown="if(event.key==='Enter')addSub(${i})">
+      <input class="in-sub-date" type="date" id="sd-${i}" title="目標完成日（可選）">
+      <button class="btn-sub-add" onclick="addSub(${i})">加入</button>
+    </div>
+  </div>`:'' ;
+
+  const isExpired=st==='expired';
+
+  el.innerHTML=`
+    <div class="card-top">
+      <div class="card-head">
+        <div class="card-head-main" onclick="toggleCollapse(${i})">
+          <span class="collapse-arrow">${collapsed?'▸':'▾'}</span>
+          <div style="min-width:0">
+            <div class="task-name">${tk.name}</div>
+            <div class="task-dl">${fmtDL(tk.deadline)}</div>
+          </div>
+        </div>
+        <div class="card-btns" onclick="event.stopPropagation()">
+          <button class="ic-btn" onclick="editTask(${i})" title="編輯"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1.5l2.5 2.5L4 11.5H1.5V9L9 1.5z"/></svg></button>
+          <button class="ic-btn" onclick="toggleCal(${i})" title="月曆"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="2.5" width="11" height="9.5" rx="1"/><path d="M1 6h11M4 1v3M9 1v3"/></svg></button>
+          <button class="ic-btn" onclick="openFocus(${i})" title="專注模式"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="5"/><circle cx="6.5" cy="6.5" r="2.2"/><circle cx="6.5" cy="6.5" r=".6" fill="currentColor" stroke="none"/></svg></button>
+          <button class="ic-btn del" onclick="delTask(${i})" title="刪除"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5h9M5 3.5V2h3v1.5M4.5 3.5l.5 7h3l.5-7"/></svg></button>
+        </div>
+      </div>
+      ${collapsed ? collapsedSummary : `<div class="card-expanded-body">${top}</div>`}
+    </div>
+    ${collapsed ? '' : `
+      ${calHTML}
+      <button class="sec-toggle" onclick="toggleSubs(${i})">
+        <span>${subOn?'▾':'▸'} 子任務${subs.length?` (${done}/${subs.length})`:''}</span>
+        <span class="tline"></span>
+      </button>
+      ${subHTML}
+      <div class="card-actions">
+        ${isExpired?`<button class="btn-archive" onclick="completeTask(${i})">📦 歸檔</button>`:`<button class="btn-complete" onclick="completeTask(${i})">✓ 完成任務</button>`}
+        <div class="card-actions-row">
+          <button class="btn-action" onclick="showModal('tip',${i})">💡 咁點算？</button>
+          <button class="btn-action" onclick="showModal('quote',${i})">😩 唔想做了</button>
+        </div>
+      </div>
+    `}`;
+  return el;
+}
+
+/* ===== FIX 1: COLLAPSE ===== */
+function toggleCollapse(i){
+  tasks[i].collapsed=!tasks[i].collapsed;
+  save();render();
+}
+
+function buildCal(tk,i){
+  const cy=tk.cy||new Date().getFullYear();
+  const cm=tk.cm!==undefined?tk.cm:new Date().getMonth();
+  const today=new Date(),dl=new Date(tk.deadline);
+  const warnD=new Date(dl);warnD.setDate(warnD.getDate()-(tk.warn||14));
+  const first=new Date(cy,cm,1),last=new Date(cy,cm+1,0);
+  const hd=['日','一','二','三','四','五','六'].map(d=>`<div class="cal-hd">${d}</div>`).join('');
+  let cells='';
+  for(let x=0;x<first.getDay();x++) cells+=`<div class="cal-d other"></div>`;
+  for(let d=1;d<=last.getDate();d++){
+    const date=new Date(cy,cm,d);
+    let cls='cal-d';
+    const isT=date.toDateString()===today.toDateString(),isDl=date.toDateString()===dl.toDateString(),isW=date.toDateString()===warnD.toDateString(),inPer=date>today&&date<dl,inW=date>=warnD&&date<dl,past=date<today&&!isT;
+    if(isDl)cls+=' deadline';else if(isT)cls+=' today';else if(isW)cls+=' warn-day';else if(inPer)cls+=inW?' in-period in-warn':' in-period';else if(past)cls+=' past';
+    cells+=`<div class="${cls}">${d}</div>`;
+  }
+  return`<div class="cal-wrap"><div class="cal-nav"><button class="cal-nav-btn" onclick="calPrev(${i})">‹</button><span class="cal-title">${cy}年 ${months[cm]}</span><button class="cal-nav-btn" onclick="calNext(${i})">›</button></div><div class="cal-grid">${hd}${cells}</div><div class="cal-legend"><span class="leg-dot" style="background:var(--safe)"></span>今日 <span class="leg-dot" style="background:var(--urgent)"></span>截止 <span class="leg-dot" style="background:rgba(158,62,53,.12);border:1px solid rgba(158,62,53,.25)"></span>倒數期 <span class="leg-dot" style="box-shadow:inset 2px 0 0 var(--warn);background:var(--surface2)"></span>警戒線</div></div>`;
+}
+
+/* ===== SORT ===== */
+function toggleSort(){sortMode='urgency';save();render();}
+function toggleManual(){sortMode='manual';render();}
+
+/* ===== SUBTASK DRAG ===== */
+function subDragStart(ti,si,e){dragSubTi=ti;dragSubSi=si;e.dataTransfer.effectAllowed='move';setTimeout(()=>{const el=e.target.closest('.sub-item');if(el)el.classList.add('dragging');},0);}
+function subDragOver(ti,si,e){if(dragSubTi!==ti||dragSubSi===si)return;e.preventDefault();const wrap=e.target.closest('.sub-wrap');if(wrap)wrap.querySelectorAll('.sub-item').forEach(el=>el.classList.remove('drag-over-top','drag-over-bot'));const item=e.target.closest('.sub-item');if(item){const mid=item.getBoundingClientRect().top+item.offsetHeight/2;item.classList.add(e.clientY<mid?'drag-over-top':'drag-over-bot');item._subDropPos=e.clientY<mid?'before':'after';}}
+function subDrop(ti,si,e){e.preventDefault();if(dragSubTi!==ti||dragSubSi===si){subDragEnd(e);return;}const item=e.target.closest('.sub-item');const pos=item?item._subDropPos||'after':'after';const subs=tasks[ti].subs;const[moved]=subs.splice(dragSubSi,1);const newSi=si>dragSubSi?si-1:si;subs.splice(pos==='before'?newSi:newSi+1,0,moved);dragSubTi=-1;dragSubSi=-1;save();render();}
+function subDragEnd(e){dragSubTi=-1;dragSubSi=-1;document.querySelectorAll('.sub-item').forEach(el=>{el.classList.remove('dragging','drag-over-top','drag-over-bot');});}
+
+/* ===== FOCUS MODE ===== */
+function openFocus(i){focusIdx=i;const tk=tasks[i];document.getElementById('fName').textContent=tk.name;document.getElementById('fDl').textContent=fmtDL(tk.deadline);updateFocusTick();focusTick=setInterval(updateFocusTick,1000);document.getElementById('focusOverlay').classList.add('on');}
+function updateFocusTick(){if(focusIdx<0)return;const tk=tasks[focusIdx];const t=getLeft(tk.deadline);const st=getStatus(tk);document.getElementById('fD').textContent=t.d;document.getElementById('fH').textContent=pad(t.h);document.getElementById('fM').textContent=pad(t.m);document.getElementById('fS').textContent=pad(t.s);const badge=document.getElementById('fBadge');badge.textContent=STATUS_LBL[st]||'';badge.className=`focus-badge ${st}`;}
+function closeFocus(){clearInterval(focusTick);focusTick=null;focusIdx=-1;document.getElementById('focusOverlay').classList.remove('on');}
+
+/* ===== NAVIGATION ===== */
+function showMain(){
+  document.getElementById('mainWrap').style.display='';
+  ['btnMain','btnOv','btnRec'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById('btnMain').classList.add('on');
+  document.getElementById('overviewOverlay').classList.remove('on');
+  document.getElementById('recordOverlay').classList.remove('on');
+}
+function showOverview(){
+  document.getElementById('mainWrap').style.display='none';
+  ['btnMain','btnOv','btnRec'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById('btnOv').classList.add('on');
+  document.getElementById('overviewOverlay').classList.add('on');
+  document.getElementById('recordOverlay').classList.remove('on');
+  buildOverview();
+}
+function showRecord(){
+  document.getElementById('mainWrap').style.display='none';
+  ['btnMain','btnOv','btnRec'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById('btnRec').classList.add('on');
+  document.getElementById('overviewOverlay').classList.remove('on');
+  document.getElementById('recordOverlay').classList.add('on');
+  buildRecord();
+}
+
+/* ===== OVERVIEW PAGE (FIX 4+5) ===== */
+function buildOverview(){
+  const el=document.getElementById('overviewContent');
+  let html='';
+
+  /* Global Calendar */
+  const cy=globalCalYear, cm=globalCalMonth;
+  const today=new Date(), first=new Date(cy,cm,1), last=new Date(cy,cm+1,0);
+  const deadlineMap={};
+  tasks.forEach(tk=>{
+    const d=new Date(tk.deadline);
+    if(d.getFullYear()===cy&&d.getMonth()===cm){
+      const k=d.getDate();
+      if(!deadlineMap[k])deadlineMap[k]=[];
+      deadlineMap[k].push({st:getStatus(tk),name:tk.name});
+    }
+  });
+  const hd=['日','一','二','三','四','五','六'].map(d=>`<div class="gcal-hd">${d}</div>`).join('');
+  let cells='';
+  for(let x=0;x<first.getDay();x++) cells+=`<div class="gcal-d other"><div class="gcal-dn"></div></div>`;
+  for(let d=1;d<=last.getDate();d++){
+    const date=new Date(cy,cm,d);
+    const isT=date.toDateString()===today.toDateString();
+    const past=date<today&&!isT;
+    const dls=deadlineMap[d]||[];
+    const dots=dls.slice(0,3).map(dl=>`<div class="gcal-dot ${dl.st}"></div>`).join('');
+    const extra=dls.length>3?`<div style="font-size:8px;color:var(--text3)">+${dls.length-3}</div>`:'';
+    cells+=`<div class="gcal-d${isT?' today':''}${past?' past':''}${dls.length?' has-dl':''}">
+      <div class="gcal-dn">${d}</div>
+      ${dls.length?`<div class="gcal-dots">${dots}${extra}</div>`:''}
+    </div>`;
+  }
+
+  html+=`<div class="section-lbl">DEADLINE 月曆</div>
+  <div class="gcal-box">
+    <div class="gcal-nav">
+      <button class="gcal-nav-btn" onclick="globalCalPrev()">‹</button>
+      <span class="gcal-title">${cy}年 ${months[cm]}</span>
+      <button class="gcal-nav-btn" onclick="globalCalNext()">›</button>
+    </div>
+    <div class="gcal-grid">${hd}${cells}</div>
+  </div>`;
+
+  /* Deadline list */
+  const sorted=[...tasks].sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
+  if(sorted.length){
+    html+=`<div class="dl-list">`;
+    sorted.forEach(tk=>{
+      const st=getStatus(tk);
+      html+=`<div class="dl-item">
+        <div class="dl-bar ${st}"></div>
+        <div style="flex:1;min-width:0"><div class="dl-name">${tk.name}</div><div class="dl-date">${fmtDL(tk.deadline)}</div></div>
+        <span class="dl-badge ${st}">${STATUS_LBL[st]||''}</span>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  /* Subtask overview */
+  html+=`<div class="section-lbl" style="margin-top:8px">所有子任務</div>`;
+  const todaySubs=[], weekSubs=[], laterSubs=[], nodateSubs=[];
+  const now=new Date(), weekEnd=new Date(now);weekEnd.setDate(weekEnd.getDate()+7);
+  tasks.forEach((tk,ti)=>{
+    (tk.subs||[]).forEach((s,si)=>{
+      if(s.done) return;
+      const item={txt:s.txt,taskName:tk.name,ti,si,due:s.due};
+      if(!s.due) nodateSubs.push(item);
+      else if(isToday(s.due)) todaySubs.push(item);
+      else if(new Date(s.due)<=weekEnd&&!isPast(s.due)) weekSubs.push(item);
+      else laterSubs.push(item);
+    });
+  });
+
+  const renderOvGroup=(label,items,cls)=>{
+    if(!items.length) return'';
+    const rows=items.map(it=>{
+      const ov=it.due&&isPast(it.due);
+      const dclass=isToday(it.due)?'ov-sub-date today-due':(ov?'ov-sub-date overdue':'ov-sub-date');
+      return`<div class="ov-sub-item">
+        <div class="chk" onclick="toggleSubOv(${it.ti},${it.si})"></div>
+        <span style="flex:1;font-size:13px">${it.txt}</span>
+        <span class="ov-task-tag">${it.taskName}</span>
+        ${it.due?`<span class="${dclass}">${fmtDate(it.due)}</span>`:''}
+      </div>`;
+    }).join('');
+    return`<div class="ov-group"><div class="ov-group-lbl ${cls}">${label}</div>${rows}</div>`;
+  };
+
+  html+=renderOvGroup('今日截止',todaySubs,'');
+  html+=renderOvGroup('本週截止',weekSubs,'');
+  html+=renderOvGroup('之後',laterSubs,'');
+  html+=renderOvGroup('無截止日期',nodateSubs,'');
+
+  const totalPending=todaySubs.length+weekSubs.length+laterSubs.length+nodateSubs.length;
+  if(!totalPending) html+=`<div class="ov-empty">所有子任務已完成 ✓</div>`;
+
+  el.innerHTML=html;
+}
+
+function globalCalPrev(){let m=globalCalMonth-1,y=globalCalYear;if(m<0){m=11;y--;}globalCalMonth=m;globalCalYear=y;buildOverview();}
+function globalCalNext(){let m=globalCalMonth+1,y=globalCalYear;if(m>11){m=0;y++;}globalCalMonth=m;globalCalYear=y;buildOverview();}
+function toggleSubOv(ti,si){tasks[ti].subs[si].done=true;tasks[ti].subs[si].doneOn=new Date().toISOString().split('T')[0];save();buildOverview();render();}
+
+/* ===== RECORD PAGE ===== */
+function buildRecord(){
+  const el=document.getElementById('recordContent');
+  let totalDone=0,totalPending=0;
+  tasks.forEach(tk=>{(tk.subs||[]).forEach(s=>{if(s.done)totalDone++;else totalPending++;});});
+  let html=`<div class="record-stats">
+    <div class="stat-box t"><span class="stat-num">${completedTasks.length}</span><span class="stat-lbl">已完成任務</span></div>
+    <div class="stat-box s"><span class="stat-num">${totalDone}</span><span class="stat-lbl">已完成子任務</span></div>
+    <div class="stat-box p"><span class="stat-num">${totalPending}</span><span class="stat-lbl">待完成子任務</span></div>
+  </div>`;
+
+  if(completedTasks.length){
+    html+=`<div class="section-lbl">已完成 / 已歸檔任務</div><div class="record-group">`;
+    completedTasks.forEach((tk,ci)=>{
+      html+=`<div class="comp-task-item">
+        <div class="comp-check">✓</div>
+        <span class="comp-task-name">${tk.name}</span>
+        <span class="comp-task-date">${tk.completedOn?fmtDateFull(tk.completedOn):''}</span>
+        <button class="btn-restore" onclick="restoreTask(${ci})">↩ 恢復</button>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  const hasSubs=tasks.some(tk=>(tk.subs||[]).length>0);
+  if(hasSubs){
+    html+=`<div class="section-lbl" style="margin-top:8px">子任務進度</div>`;
+    tasks.forEach(tk=>{
+      const subs=tk.subs||[];if(!subs.length)return;
+      const doneSubs=subs.filter(s=>s.done).sort((a,b)=>new Date(b.doneOn||0)-new Date(a.doneOn||0));
+      const pendSubs=subs.filter(s=>!s.done);
+      html+=`<div class="record-group"><div class="record-group-name">${tk.name}</div>`;
+      doneSubs.forEach(s=>{html+=`<div class="record-item"><div class="record-dot"></div><span class="record-txt">${s.txt}</span><span class="record-date done-on">${s.doneOn?fmtDateFull(s.doneOn):''}</span></div>`;});
+      pendSubs.forEach(s=>{const ov=s.due&&isPast(s.due);html+=`<div class="record-item"><div class="record-dot ${ov?'overdue':'pending'}"></div><span class="record-txt">${s.txt}</span><span class="record-date ${ov?'overdue':''}">${s.due?(ov?'已過期 ':'目標 ')+fmtDate(s.due):''}</span></div>`;});
+      html+=`</div>`;
+    });
+  }
+  if(!completedTasks.length&&!hasSubs) html+=`<div class="record-empty">尚未有完成記錄</div>`;
+  el.innerHTML=html;
+}
+
+/* ===== FIX 6: RESTORE TASK ===== */
+function restoreTask(ci){
+  const tk=completedTasks[ci];
+  delete tk.completedOn; delete tk.completedType;
+  tasks.push(tk);
+  completedTasks.splice(ci,1);
+  save();
+  showToast(`「${tk.name}」已恢復`,false);
+  buildRecord(); render();
+}
+
+/* ===== MODAL ===== */
+function showModal(type,i){mType=type;mIdx=Math.floor(Math.random()*(type==='tip'?TIPS.length:QUOTES.length));document.getElementById('mTag').textContent=type==='tip'?'💡 ADHD 實用建議':'😩 你唔係唯一一個唔想做的';fillModal();document.getElementById('overlay').classList.add('on');}
+function fillModal(){const arr=mType==='tip'?TIPS:QUOTES;const item=arr[mIdx];document.getElementById('mBody').textContent=mType==='tip'?item.t:`"${item.t}"`;document.getElementById('mAttr').textContent=item.a||'';}
+function nextItem(){const arr=mType==='tip'?TIPS:QUOTES;let n;do{n=Math.floor(Math.random()*arr.length);}while(n===mIdx&&arr.length>1);mIdx=n;fillModal();}
+function closeModal(){document.getElementById('overlay').classList.remove('on');}
+
+/* ===== EDIT TASK ===== */
+function editTask(i){editIdx=i;const tk=tasks[i];document.getElementById('eName').value=tk.name;const d=new Date(tk.deadline);const fmt=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());document.getElementById('eDl').value=fmt;document.getElementById('eWarn').value=tk.warn||14;document.getElementById('editOverlay').classList.add('on');}
+function closeEdit(){editIdx=-1;document.getElementById('editOverlay').classList.remove('on');}
+function saveEdit(){if(editIdx<0)return;const n=document.getElementById('eName').value.trim();const dl=document.getElementById('eDl').value;const w=parseInt(document.getElementById('eWarn').value)||14;if(!n||!dl){alert('請填寫任務名稱同截止日期');return;}tasks[editIdx].name=n;tasks[editIdx].deadline=dl;tasks[editIdx].warn=w;save();render();closeEdit();}
+
+/* ===== COMPLETE TASK ===== */
+function completeTask(i){
+  const tk=tasks[i],st=getStatus(tk);
+  const copy=JSON.parse(JSON.stringify(tk));
+  copy.completedOn=new Date().toISOString().split('T')[0];
+  copy.completedType=st==='expired'?'archived':'completed';
+  completedTasks.unshift(copy);tasks.splice(i,1);save();
+  showToast(st==='expired'?`「${copy.name}」已歸檔`:`🎉 「${copy.name.substring(0,14)}」完成！`,false);
+  render();
+}
+
+/* ===== TOAST ===== */
+function showToast(msg,withUndo=true){
+  document.getElementById('toastMsg').textContent=msg;
+  document.getElementById('toastUndoBtn').style.display=withUndo?'':'none';
+  document.getElementById('toast').classList.add('show');
+  if(!withUndo) setTimeout(hideToast,2800);
+}
+function hideToast(){document.getElementById('toast').classList.remove('show');}
+function undoDelete(){
+  if(!undoItem)return;clearTimeout(undoTimeout);
+  const{ti,si,data}=undoItem;
+  if(tasks[ti]){tasks[ti].subs.splice(si,0,data);save();render();}
+  undoItem=null;hideToast();
+}
+
+/* ===== ACTIONS ===== */
+function addTask(){
+  const n=document.getElementById('iName').value.trim();
+  const dl=document.getElementById('iDl').value;
+  const w=parseInt(document.getElementById('iWarn').value)||14;
+  if(!n||!dl){alert('請填寫任務名稱同截止日期');return;}
+  tasks.push({id:Date.now(),name:n,deadline:dl,warn:w,subs:[],calOn:false,subOn:true,collapsed:false,cy:new Date().getFullYear(),cm:new Date().getMonth()});
+  document.getElementById('iName').value='';document.getElementById('iDl').value='';document.getElementById('iWarn').value='14';
+  save();render();
+}
+function delTask(i){if(confirm(`刪除「${tasks[i].name}」？`)){tasks.splice(i,1);save();render();}}
+function toggleCal(i){tasks[i].calOn=!tasks[i].calOn;if(tasks[i].calOn){tasks[i].cy=new Date().getFullYear();tasks[i].cm=new Date().getMonth();}save();render();}
+function toggleSubs(i){tasks[i].subOn=!tasks[i].subOn;save();render();}
+function calPrev(i){let m=tasks[i].cm-1,y=tasks[i].cy;if(m<0){m=11;y--;}tasks[i].cm=m;tasks[i].cy=y;save();render();}
+function calNext(i){let m=tasks[i].cm+1,y=tasks[i].cy;if(m>11){m=0;y++;}tasks[i].cm=m;tasks[i].cy=y;save();render();}
+function addSub(i){const inp=document.getElementById(`si-${i}`);const dInp=document.getElementById(`sd-${i}`);const txt=inp.value.trim();if(!txt)return;if(!tasks[i].subs)tasks[i].subs=[];tasks[i].subs.push({txt,due:dInp.value||null,done:false,doneOn:null});inp.value='';save();render();}
+function toggleSub(ti,si){const s=tasks[ti].subs[si];s.done=!s.done;s.doneOn=s.done?new Date().toISOString().split('T')[0]:null;save();render();}
+function delSub(ti,si){
+  clearTimeout(undoTimeout);
+  const data=JSON.parse(JSON.stringify(tasks[ti].subs[si]));
+  undoItem={ti,si,data};tasks[ti].subs.splice(si,1);save();render();
+  showToast(`已刪除「${data.txt.substring(0,12)}」`,true);
+  undoTimeout=setTimeout(()=>{undoItem=null;hideToast();},4000);
+}
+
+/* ===== TICK ===== */
+function tick(){tasks.forEach((tk,i)=>{const ds=document.getElementById(`s-${i}`);if(!ds)return;const t=getLeft(tk.deadline);const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};set(`d-${i}`,t.d);set(`h-${i}`,pad(t.h));set(`m-${i}`,pad(t.m));set(`s-${i}`,pad(t.s));});}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeFocus();closeEdit();}});
+
+render();
+setInterval(tick,1000);
+setInterval(render,60000);
+
+/* ===== SERVICE WORKER ===== */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
